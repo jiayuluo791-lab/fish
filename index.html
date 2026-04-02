@@ -5,209 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>家渝的个人鱼塘</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-        
-        /* 1. 背景图 */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "PingFang SC", sans-serif; }
         body { 
             background-image: url("dist/assets/img/water.jpg");
             background-size: cover; background-position: center;
-            background-attachment: fixed; background-repeat: no-repeat;
-            background-color: #e0f7fa; 
+            background-attachment: fixed; background-color: #e0f7fa; 
         }
         
-        /* 2. 中心头像 */
+        /* 中心头像 */
         #profile-avatar {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 220px; height: 220px;
-            border-radius: 50%;
-            border: 8px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%; border: 8px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
             z-index: 5; object-fit: cover;
             animation: float 4s ease-in-out infinite;
         }
+        @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-15px); } }
 
-        @keyframes float {
-            0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-            50% { transform: translate(-50%, -50%) translateY(-15px); }
-        }
-
-        /* 3. 鱼 */
-        .fish { position: absolute; cursor: pointer; z-index: 10; }
-        .fish img { width: 80px; height: auto; display: block; margin: 0 auto; }
+        /* 基础鱼 */
+        .fish { position: absolute; cursor: pointer; z-index: 10; transition: transform 0.3s; }
+        .fish img { width: 80px; height: auto; }
         .fish div { font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px; }
 
-        /* 4. 遮罩层 */
-        #overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(8px); z-index: 90; 
+        /* 通用遮罩 */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); backdrop-filter: blur(8px); z-index: 90; }
+
+        /* 基础泡泡样式 */
+        .bubble-common {
+            position: fixed; display: none; justify-content: center; align-items: center;
+            border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), rgba(178, 235, 242, 0.2));
+            backdrop-filter: blur(4px); box-shadow: inset -5px -5px 15px rgba(255,255,255,0.3);
+            cursor: pointer; z-index: 100; text-align: center; color: #00796b;
         }
 
-        /* 5. 泡泡弹窗 */
-        #modal {
-            display: none;
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.3);
-            width: 260px; height: 260px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7) 0%, rgba(178, 235, 242, 0.4) 40%, rgba(0, 150, 136, 0.1) 100%);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: inset -5px -5px 15px rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(4px);
-            padding: 40px; box-sizing: border-box;
-            text-align: center; z-index: 100;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer; overflow: hidden; opacity: 0;
+        /* 兴趣爱好扩散的小气泡 */
+        .sub-bubble {
+            width: 100px; height: 100px; font-size: 14px; font-weight: bold;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .sub-bubble:hover { transform: scale(1.2); background: rgba(255,255,255,0.8); }
+
+        /* 详情展示大卡片 */
+        #detail-card {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; max-width: 500px; padding: 40px; border-radius: 30px;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+            z-index: 110; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
-        /* 变身为大展示厅 */
-        #modal.expanded {
-            width: 90%; max-width: 850px;
-            height: auto; min-height: 500px;
-            border-radius: 30px; 
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            cursor: default;
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        /* 列表展示大框 */
+        #list-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 800px; padding: 40px; border-radius: 30px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); z-index: 100;
         }
 
-        @keyframes bubblePop {
-            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        .showBubble { animation: bubblePop 0.5s ease-out forwards; }
-
-        /* 内容排版样式 */
-        #modal-title { font-size: 22px; color: #00796b; margin-top: 50px; transition: 0.4s; }
-        #modal.expanded #modal-title { margin-top: 0; font-size: 32px; border-bottom: 2px solid #e0f2f1; padding-bottom: 15px; margin-bottom: 20px; }
-        
-        #modal-content { font-size: 15px; color: #444; line-height: 1.6; }
-        
-        /* 内部格栅排版 */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-        .info-section { background: rgba(0,150,136,0.03); padding: 15px; border-radius: 12px; }
-        .info-section h4 { margin: 0 0 8px 0; color: #00796b; font-size: 16px; display: flex; align-items: center; }
-        .tag { display: inline-block; background: #e0f2f1; color: #00796b; padding: 2px 8px; border-radius: 4fr; font-size: 12px; margin: 2px; font-weight: bold; }
-
-        #close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; color: #999; font-size: 24px; }
+        #close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #999; }
     </style>
 </head>
 <body>
 
-<img id="profile-avatar" src="dist/assets/img/profile.jpg" alt="家渝的照片">
+<img id="profile-avatar" src="dist/assets/img/profile.jpg">
 
-<div id="overlay" onclick="closeModal()"></div>
-<div id="modal" onclick="expandBubble()">
-    <div id="close-btn" onclick="closeModal(); event.stopPropagation()">×</div>
-    <h2 id="modal-title">标题</h2>
-    <div id="modal-content">点击查看详情</div>
+<div id="overlay" onclick="closeAll()"></div>
+
+<div id="detail-card">
+    <div id="close-btn" onclick="closeDetail()">×</div>
+    <h2 id="detail-title" style="color:#00796b"></h2>
+    <div id="detail-content" style="line-height:1.8; color:#444"></div>
+</div>
+
+<div id="list-modal" class="modal-content">
+    <div id="close-btn" onclick="closeAll()">×</div>
+    <h2 id="list-title" style="color:#00796b"></h2>
+    <div id="list-content"></div>
 </div>
 
 <script>
+    const hobbyData = {
+        '网球': '热爱挥洒汗水的快感，网球不仅是运动，更是对节奏和爆发力的掌控。',
+        '游泳': '在水底世界寻找宁静，享受每一次划水带来的自由感。',
+        '追星': '记录美好瞬间，学习优秀偶像的闪光点，也是一种生活动力。',
+        '旅游': '看遍广东的山水，也向往更远的远方。喜欢策划路线，挖掘小众打卡地。'
+    };
+
     const fishData = [
-        { 
-            title: '基础信息', 
-            details: `
-                <div class="info-grid">
-                    <div class="info-section">
-                        <h4>👤 个人概况</h4>
-                        <b>姓名：</b>罗家渝<br>
-                        <b>专业：</b>华南农业大学 · 农林经济管理<br>
-                        <b>政治面貌：</b>中共预备党员<br>
-                        <b>时间线：</b>2023 - 2027 (本科)
-                    </div>
-                    <div class="info-section">
-                        <h4>📍 联系方式</h4>
-                        <b>籍贯：</b>广东东莞 / <b>现居：</b>广州天河<br>
-                        <b>电话：</b>18998055663<br>
-                        <b>邮箱：</b>2304362354@qq.com
-                    </div>
-                    <div class="info-section" style="grid-column: span 2;">
-                        <h4>🏆 荣誉与语言</h4>
-                        <div>
-                            <span class="tag">CET-4</span> <span class="tag">CET-6</span>
-                            <span class="tag">日常工作交流无障碍</span>
-                        </div>
-                        <div style="margin-top:8px;">
-                            🏅 <b>曾连续两年获得校级奖学金</b>
-                        </div>
-                    </div>
-                    <div class="info-section" style="grid-column: span 2;">
-                        <h4>💻 专业技能</h4>
-                        <b>数据处理：</b>计算机二级、精通 Excel 数据透视表等追踪分析<br>
-                        <b>办公协作：</b>熟练掌握 Word、PPT 等全套 Office 软件<br>
-                        <b>视觉创意：</b>Figma、PS、秀米、Canva (独立策划设计)<br>
-                        <b>视频剪辑：</b>剪映 (独立完成短视频策划与制作)
-                    </div>
-                </div>
-            `
-        },
-        { title: '实习简历', details: '实习经历内容准备中...' },
-        { title: '项目经历', details: 'Tada App 推广及项目细节...' },
-        { title: '我的自媒体', details: '作品链接与运营数据...' },
-        { title: '性格与爱好', details: '生活点滴与个人兴趣...' }
+        { title: '基础信息', details: '...（此处省略你之前的详细代码，保持一致即可）' },
+        { title: '实习简历', details: '实习经历建设中...' },
+        { title: '性格与爱好', type: 'special' }
     ];
 
-    let currentFishDetails = "";
-
-    fishData.forEach((data) => {
+    // 生成鱼
+    fishData.forEach((data, index) => {
         const fish = document.createElement('div');
         fish.className = 'fish';
         fish.innerHTML = `<img src="dist/assets/img/fish1.png"><div>${data.title}</div>`;
         document.body.appendChild(fish);
-
-        let posX = Math.random() * (window.innerWidth - 100);
-        let posY = Math.random() * (window.innerHeight - 100);
+        
+        let posX = Math.random() * window.innerWidth;
+        let posY = Math.random() * window.innerHeight;
         let velX = (Math.random() - 0.5) * 2;
         let velY = (Math.random() - 0.5) * 2;
 
         function move() {
             posX += velX; posY += velY;
-            if (posX < 0 || posX > window.innerWidth - 100) velX *= -1;
-            if (posY < 0 || posY > window.innerHeight - 100) velY *= -1;
+            if (posX < 0 || posX > window.innerWidth - 80) velX *= -1;
+            if (posY < 0 || posY > window.innerHeight - 80) velY *= -1;
             fish.style.left = posX + 'px';
             fish.style.top = posY + 'px';
-            const fishImg = fish.querySelector('img');
-            if (fishImg) { fishImg.style.transform = velX > 0 ? 'scaleX(1)' : 'scaleX(-1)'; }
+            fish.style.transform = velX > 0 ? 'scaleX(1)' : 'scaleX(-1)';
             requestAnimationFrame(move);
         }
         move();
 
         fish.onclick = () => {
-            const modal = document.getElementById('modal');
-            document.getElementById('modal-title').innerText = data.title;
-            document.getElementById('modal-content').innerHTML = "点击泡泡查看详情";
-            currentFishDetails = data.details;
-            modal.classList.remove('expanded');
-            modal.style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-            modal.style.animation = 'none';
-            modal.offsetHeight;
-            modal.style.animation = null; 
-            modal.classList.add('showBubble');
+            if (data.type === 'special') {
+                showHobbyBubbles();
+            } else {
+                showNormalModal(data.title, data.details);
+            }
         };
     });
 
-    function expandBubble() {
-        const modal = document.getElementById('modal');
-        if (modal.classList.contains('expanded')) return;
-        modal.classList.add('expanded');
-        modal.classList.remove('showBubble');
-        setTimeout(() => {
-            document.getElementById('modal-content').innerHTML = currentFishDetails;
-        }, 150);
+    // 1. 特殊交互：展示兴趣爱好小气泡
+    function showHobbyBubbles() {
+        document.getElementById('overlay').style.display = 'block';
+        const hobbies = Object.keys(hobbyData);
+        hobbies.forEach((name, i) => {
+            const b = document.createElement('div');
+            b.className = 'bubble-common sub-bubble';
+            b.innerText = name;
+            b.style.display = 'flex';
+            document.body.appendChild(b);
+
+            // 初始位置在中心
+            const centerX = window.innerWidth / 2 - 50;
+            const centerY = window.innerHeight / 2 - 50;
+            b.style.left = centerX + 'px';
+            b.style.top = centerY + 'px';
+
+            // 扩散动画
+            const angle = (i / hobbies.length) * Math.PI * 2;
+            const dist = 180; 
+            setTimeout(() => {
+                b.style.left = (centerX + Math.cos(angle) * dist) + 'px';
+                b.style.top = (centerY + Math.sin(angle) * dist) + 'px';
+            }, 10);
+
+            b.onclick = (e) => {
+                e.stopPropagation();
+                showDetail(name, hobbyData[name]);
+            };
+        });
     }
 
-    function closeModal() {
-        const modal = document.getElementById('modal');
-        modal.style.display = 'none';
+    // 展示普通模态框
+    function showNormalModal(title, content) {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('list-modal').style.display = 'block';
+        document.getElementById('list-title').innerText = title;
+        document.getElementById('list-content').innerHTML = content;
+    }
+
+    // 2. 三级交互：展示具体爱好详情
+    function showDetail(title, text) {
+        const card = document.getElementById('detail-card');
+        document.getElementById('detail-title').innerText = title;
+        document.getElementById('detail-content').innerText = text;
+        card.style.display = 'block';
+        card.style.animation = 'bubblePop 0.4s ease-out forwards';
+    }
+
+    function closeDetail() {
+        document.getElementById('detail-card').style.display = 'none';
+    }
+
+    function closeAll() {
         document.getElementById('overlay').style.display = 'none';
-        modal.classList.remove('expanded');
+        document.getElementById('list-modal').style.display = 'none';
+        document.getElementById('detail-card').style.display = 'none';
+        document.querySelectorAll('.sub-bubble').forEach(b => b.remove());
     }
 </script>
 </body>
