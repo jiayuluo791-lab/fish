@@ -7,7 +7,7 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "Microsoft YaHei", sans-serif; }
         
-        /* 1. 背景图：依然指向 dist 里的水面 */
+        /* 背景图路径：统一指向 dist 文件夹 */
         body { 
             background-image: url("dist/assets/img/water.jpg");
             background-size: cover;
@@ -17,7 +17,7 @@
             background-color: #e0f7fa; 
         }
         
-        /* 2. 中心头像：直接指向根目录下的 profile.jpg */
+        /* 中心头像：统一指向 dist 文件夹 */
         #profile-avatar {
             position: fixed;
             top: 50%; left: 50%;
@@ -36,21 +36,10 @@
             50% { transform: translate(-50%, -50%) translateY(-15px); }
         }
 
-        /* 3. 鱼容器样式 */
         .fish { position: absolute; cursor: pointer; z-index: 10; }
-        .fish img { 
-            width: 80px; height: auto; display: block; margin: 0 auto;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); 
-            transition: transform 0.3s; 
-        }
-        
-        .fish div {
-            font-size: 14px; color: #00796b; font-weight: bold; text-align: center;
-            margin-top: 5px; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
-            pointer-events: none;
-        }
+        .fish img { width: 80px; height: auto; display: block; margin: 0 auto; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .fish div { font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); }
 
-        /* 4. 遮罩与弹窗（基础版，等资料准备好再升级泡泡） */
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); z-index: 90; }
         #modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -64,7 +53,7 @@
 </head>
 <body>
 
-<img id="profile-avatar" src="profile.jpg" alt="家玉的照片">
+<img id="profile-avatar" src="dist/assets/img/profile.jpg" alt="家玉的照片">
 
 <div id="overlay" onclick="closeModal()"></div>
 <div id="modal">
@@ -75,17 +64,17 @@
 
 <script>
     const fishData = [
-        { title: '基础信息', content: '这里将展示你的姓名、联系方式等资料。' },
-        { title: '实习简历', content: '这里将展示你的实习经历。' },
-        { title: '项目经历', content: '这里将展示你的项目成果。' },
-        { title: '我的自媒体', content: '这里将展示你的作品与数据。' },
-        { title: '性格与爱好', content: '这里将分享你的生活点滴。' }
+        { title: '基础信息', content: '加载中...' },
+        { title: '实习简历', content: '加载中...' },
+        { title: '项目经历', content: '加载中...' },
+        { title: '我的自媒体', content: '加载中...' },
+        { title: '性格与爱好', content: '加载中...' }
     ];
 
     fishData.forEach((data) => {
         const fish = document.createElement('div');
         fish.className = 'fish';
-        // 鱼图片依然在 dist 文件夹里
+        // 鱼路径也改为 dist 里的
         fish.innerHTML = `
             <img src="dist/assets/img/fish1.png">
             <div>${data.title}</div>
@@ -123,4 +112,5 @@
     }
 </script>
 </body>
+</html>
 </html>
