@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>家渝的个人鱼塘</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "PingFang SC", sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
         body { 
             background-image: url("dist/assets/img/water.jpg");
             background-size: cover; background-position: center;
-            background-attachment: fixed; background-color: #e0f7fa; 
+            background-attachment: fixed; background-repeat: no-repeat;
+            background-color: #e0f7fa; 
         }
         
-        /* 中心头像 */
         #profile-avatar {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 220px; height: 220px; border-radius: 50%; border: 8px solid rgba(255, 255, 255, 0.4);
@@ -21,46 +21,53 @@
         }
         @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-15px); } }
 
-        /* 🐟 鱼容器：解决文字反向问题 */
+        /* 🐟 鱼容器：文字防镜像 */
         .fish { position: absolute; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; }
         .fish img { width: 80px; height: auto; transition: transform 0.1s; }
-        .fish div { 
-            font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px;
-            /* 强制文字永远不反转 */
-            transform: scaleX(1) !important; 
-        }
+        .fish div { font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px; }
 
+        /* 遮罩层 */
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.05); backdrop-filter: blur(8px); z-index: 90; }
 
         /* 🧼 泡泡基础样式 */
         .bubble-common {
             position: fixed; border-radius: 50%; border: 1px solid rgba(255,255,255,0.6);
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5), rgba(178, 235, 242, 0.1));
-            backdrop-filter: blur(2px); display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 100; color: #00796b; pointer-events: auto;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5), rgba(178, 235, 242, 0.2));
+            backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 100; color: #00796b; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 破碎时洒落的小碎泡泡 */
+        /* 破碎的小碎泡泡 */
         .tiny-bubble {
-            position: fixed; background: rgba(255, 255, 255, 0.4); border-radius: 50%;
-            pointer-events: none; z-index: 99; animation: fall 2s ease-out forwards;
+            position: fixed; background: rgba(255, 255, 255, 0.5); border-radius: 50%;
+            pointer-events: none; z-index: 99; animation: fall 1.5s ease-out forwards;
         }
         @keyframes fall {
             0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(100px) scale(0.2); opacity: 0; }
+            100% { transform: translateY(80px) scale(0); opacity: 0; }
         }
 
-        /* 详情卡片：Q弹出现 */
+        /* 统一大弹窗样式 (基础信息/实习等使用) */
+        #main-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 800px; padding: 40px; border-radius: 30px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            z-index: 110; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        /* 兴趣爱好详情卡片 (三级弹窗) */
         #detail-card {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80%; max-width: 450px; padding: 40px; border-radius: 30px;
-            background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-            z-index: 110; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            width: 80%; max-width: 450px; padding: 35px; border-radius: 25px;
+            background: rgba(255,255,255,1); z-index: 120; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
         }
-        @keyframes popIn { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
-        #close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #ccc; }
+        .close-x { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #ccc; }
+
+        /* 基础信息内容排版 */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; }
+        .info-section { background: rgba(0,150,136,0.03); padding: 15px; border-radius: 12px; }
+        .tag { display: inline-block; background: #e0f2f1; color: #00796b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -68,8 +75,14 @@
 <img id="profile-avatar" src="dist/assets/img/profile.jpg">
 <div id="overlay" onclick="closeAll()"></div>
 
+<div id="main-modal">
+    <div class="close-x" onclick="closeAll()">×</div>
+    <h2 id="main-title" style="color:#00796b; margin-top:0;"></h2>
+    <div id="main-content"></div>
+</div>
+
 <div id="detail-card">
-    <div id="close-btn" onclick="closeDetail()">×</div>
+    <div class="close-x" onclick="closeDetail()">×</div>
     <h2 id="detail-title" style="color:#00796b; margin-top:0;"></h2>
     <div id="detail-content" style="line-height:1.8; color:#444"></div>
 </div>
@@ -83,14 +96,48 @@
     };
 
     const fishData = [
-        { title: '基础信息', details: '...（保持你之前的详细简历HTML代码）' },
+        { 
+            title: '基础信息', 
+            details: `
+                <div class="info-grid">
+                    <div class="info-section">
+                        <h4 style="margin:0 0 10px 0; color:#00796b;">👤 个人概况</h4>
+                        <b>姓名：</b>罗家渝<br>
+                        <b>专业：</b>华南农业大学 · 农林经济管理<br>
+                        <b>政治面貌：</b>中共预备党员<br>
+                        <b>时间线：</b>2023 - 2027 (本科)
+                    </div>
+                    <div class="info-section">
+                        <h4 style="margin:0 0 10px 0; color:#00796b;">📍 联系方式</h4>
+                        <b>籍贯：</b>广东东莞 / <b>现居：</b>广州天河<br>
+                        <b>电话：</b>18998055663<br>
+                        <b>邮箱：</b>2304362354@qq.com
+                    </div>
+                    <div class="info-section" style="grid-column: span 2;">
+                        <h4 style="margin:0 0 10px 0; color:#00796b;">🏆 荣誉与语言</h4>
+                        <span class="tag">CET-4</span> <span class="tag">CET-6</span>
+                        <div style="margin-top:8px;">🏅 <b>曾连续两年获得校级奖学金</b></div>
+                    </div>
+                    <div class="info-section" style="grid-column: span 2;">
+                        <h4 style="margin:0 0 10px 0; color:#00796b;">💻 专业技能</h4>
+                        <b>数据：</b>计算机二级、精通 Excel 数据透视表分析<br>
+                        <b>视觉：</b>Figma、PS、Canva、秀米 (独立设计能力)<br>
+                        <b>视频：</b>剪映 (独立完成短视频策划与制作)
+                    </div>
+                </div>
+            `
+        },
+        { title: '实习简历', details: '<p style="text-align:center; padding:50px;">实习经历正在整理中，敬请期待...</p>' },
+        { title: '项目经历', details: '<p style="text-align:center; padding:50px;">Tada App 推广项目细节正在录入...</p>' },
+        { title: '我的自媒体', details: '<p style="text-align:center; padding:50px;">自媒体运营数据与作品展示准备中...</p>' },
         { title: '性格与爱好', type: 'special' }
     ];
 
+    // 初始化鱼群
     fishData.forEach((data) => {
         const fish = document.createElement('div');
         fish.className = 'fish';
-        fish.innerHTML = `<img src="dist/assets/img/fish1.png"><div class="fish-txt">${data.title}</div>`;
+        fish.innerHTML = `<img src="dist/assets/img/fish1.png"><div>${data.title}</div>`;
         document.body.appendChild(fish);
         
         let posX = Math.random() * (window.innerWidth - 100);
@@ -104,72 +151,68 @@
             if (posY < 0 || posY > window.innerHeight - 80) velY *= -1;
             fish.style.left = posX + 'px';
             fish.style.top = posY + 'px';
-            
-            // ✨ 修复点：只镜像图片，文字永远保持 scaleX(1)
             const img = fish.querySelector('img');
             img.style.transform = velX > 0 ? 'scaleX(1)' : 'scaleX(-1)';
-            
             requestAnimationFrame(move);
         }
         move();
 
         fish.onclick = () => {
-            if (data.type === 'special') startSpecialEffect();
+            if (data.type === 'special') startHobbyFlow();
             else showNormalModal(data.title, data.details);
         };
     });
 
-    // 1. ✨ 核心交互：破碎动效逻辑
-    function startSpecialEffect() {
+    // 展示普通内容 (基础信息/简历等)
+    function showNormalModal(title, content) {
         document.getElementById('overlay').style.display = 'block';
-        
-        // 先生成一个大气泡
+        const m = document.getElementById('main-modal');
+        document.getElementById('main-title').innerText = title;
+        document.getElementById('main-content').innerHTML = content;
+        m.style.display = 'block';
+    }
+
+    // ✨ 华丽破碎流：兴趣爱好
+    function startHobbyFlow() {
+        document.getElementById('overlay').style.display = 'block';
         const big = document.createElement('div');
         big.className = 'bubble-common';
-        big.style.width = '180px'; big.style.height = '180px';
-        big.style.left = 'calc(50% - 90px)'; big.style.top = 'calc(50% - 90px)';
-        big.style.fontSize = '20px'; big.innerText = '性格与爱好';
-        big.style.display = 'flex';
+        big.style.width = '160px'; big.style.height = '160px';
+        big.style.left = 'calc(50% - 80px)'; big.style.top = 'calc(50% - 80px)';
+        big.style.fontSize = '18px'; big.style.fontWeight = 'bold';
+        big.innerText = '性格与爱好'; big.style.display = 'flex';
         document.body.appendChild(big);
 
         big.onclick = (e) => {
             e.stopPropagation();
-            // 碎裂：大气泡消失
-            big.style.transform = 'scale(1.5)';
-            big.style.opacity = '0';
-            setTimeout(() => big.remove(), 200);
+            // 碎裂动画
+            big.style.transform = 'scale(1.8)'; big.style.opacity = '0';
+            for(let i=0; i<12; i++) createTinyBubble(window.innerWidth/2, window.innerHeight/2);
+            setTimeout(() => big.remove(), 300);
 
-            // 产生洒落的细碎微型气泡
-            for(let i=0; i<15; i++) {
-                createTinyBubble(window.innerWidth/2, window.innerHeight/2);
-            }
-
-            // 迸发出四个功能气泡
+            // 弹出小泡泡
             const hobbies = Object.keys(hobbyData);
             hobbies.forEach((name, i) => {
                 const sub = document.createElement('div');
-                sub.className = 'bubble-common hobby-sub';
-                sub.style.width = '90px'; sub.style.height = '90px';
-                sub.innerText = name; sub.style.fontWeight = 'bold';
-                sub.style.display = 'flex';
+                sub.className = 'bubble-common sub-h';
+                sub.style.width = '85px'; sub.style.height = '85px';
+                sub.innerText = name; sub.style.display = 'flex';
+                sub.style.left = (window.innerWidth/2 - 42) + 'px';
+                sub.style.top = (window.innerHeight/2 - 42) + 'px';
                 document.body.appendChild(sub);
 
                 const angle = (i / hobbies.length) * Math.PI * 2;
-                const dist = 200;
-                const startX = window.innerWidth/2 - 45;
-                const startY = window.innerHeight/2 - 45;
-                sub.style.left = startX + 'px'; sub.style.top = startY + 'px';
-
-                // 迸发动画
+                const dist = 190;
                 setTimeout(() => {
-                    sub.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    sub.style.left = (startX + Math.cos(angle) * dist) + 'px';
-                    sub.style.top = (startY + Math.sin(angle) * dist) + 'px';
+                    sub.style.left = (window.innerWidth/2 - 42 + Math.cos(angle) * dist) + 'px';
+                    sub.style.top = (window.innerHeight/2 - 42 + Math.sin(angle) * dist) + 'px';
                 }, 50);
 
                 sub.onclick = (ev) => {
                     ev.stopPropagation();
-                    showDetail(name, hobbyData[name]);
+                    document.getElementById('detail-title').innerText = name;
+                    document.getElementById('detail-content').innerText = hobbyData[name];
+                    document.getElementById('detail-card').style.display = 'block';
                 };
             });
         };
@@ -178,24 +221,19 @@
     function createTinyBubble(x, y) {
         const t = document.createElement('div');
         t.className = 'tiny-bubble';
-        const size = Math.random() * 8 + 4;
+        const size = Math.random() * 10 + 5;
         t.style.width = size + 'px'; t.style.height = size + 'px';
-        t.style.left = x + (Math.random()-0.5)*100 + 'px';
-        t.style.top = y + (Math.random()-0.5)*100 + 'px';
+        t.style.left = x + (Math.random()-0.5)*80 + 'px';
+        t.style.top = y + (Math.random()-0.5)*80 + 'px';
         document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2000);
-    }
-
-    function showDetail(title, text) {
-        document.getElementById('detail-title').innerText = title;
-        document.getElementById('detail-content').innerText = text;
-        document.getElementById('detail-card').style.display = 'block';
+        setTimeout(() => t.remove(), 1500);
     }
 
     function closeDetail() { document.getElementById('detail-card').style.display = 'none'; }
     
     function closeAll() {
         document.getElementById('overlay').style.display = 'none';
+        document.getElementById('main-modal').style.display = 'none';
         document.getElementById('detail-card').style.display = 'none';
         document.querySelectorAll('.bubble-common').forEach(b => b.remove());
     }
