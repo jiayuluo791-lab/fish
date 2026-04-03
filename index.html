@@ -21,12 +21,11 @@
         }
         @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-15px); } }
 
-        /* 🐟 鱼容器：文字防镜像 */
+        /* 🐟 鱼容器 */
         .fish { position: absolute; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; }
         .fish img { width: 80px; height: auto; transition: transform 0.1s; }
         .fish div { font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px; }
 
-        /* 遮罩层 */
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.05); backdrop-filter: blur(8px); z-index: 90; }
 
         /* 🧼 泡泡基础样式 */
@@ -47,7 +46,7 @@
             100% { transform: translateY(80px) scale(0); opacity: 0; }
         }
 
-        /* 统一大弹窗样式 (基础信息/实习等使用) */
+        /* 统一大弹窗样式 */
         #main-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 90%; max-width: 800px; padding: 40px; border-radius: 30px;
@@ -55,45 +54,49 @@
             z-index: 110; box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
 
-        /* 兴趣爱好详情卡片 (三级弹窗) */
+        /* 兴趣爱好详情卡片 */
         #detail-card {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80%; max-width: 480px; padding: 35px; border-radius: 25px;
+            width: 85%; max-width: 480px; 
+            /* 限制整个卡片高度，防止超出屏幕 */
+            max-height: 85vh; 
+            padding: 35px; border-radius: 25px;
             background: rgba(255,255,255,1); z-index: 120; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            /* 确保内部溢出内容（如海报）可以控制 */
-            overflow: hidden; 
+            overflow-y: auto; /* 如果内容多，卡片内部可滚动 */
         }
 
-        .close-x { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #ccc; z-index: 10; }
+        /* 自定义滚动条样式，让它更好看 */
+        #detail-card::-webkit-scrollbar { width: 6px; }
+        #detail-card::-webkit-scrollbar-thumb { background: rgba(0, 150, 136, 0.2); border-radius: 10px; }
+
+        .close-x { position: sticky; top: -10px; float: right; cursor: pointer; font-size: 24px; color: #ccc; z-index: 15; background: white; border-radius: 50%; width: 30px; height: 30px; text-align: center; line-height: 30px; }
 
         /* =========================================
-           ✨ 核心修改 1：海报舒展开的 CSS 动画 ✨
+           ✨ 核心修改：响应式舒展开容器 ✨
            ========================================= */
         #poster-container {
             width: 100%;
-            /* 初始高度为 0，隐藏 */
             max-height: 0; 
             overflow: hidden;
             margin-top: 15px;
-            /* 关键：舒展开的过渡效果 */
-            transition: max-height 1s ease-in-out; 
+            transition: max-height 0.8s ease-in-out; 
             text-align: center;
         }
 
-        /* 当添加 .unfold 类时，max-height 变大，图片舒展开 */
         #poster-container.unfold {
-            /* 设置一个足够大的值，确保海报能完全显示 */
-            max-height: 600px; 
+            /* 智能高度：最大为窗口高度的 60%，超出部分可在卡片内滚动查看 */
+            max-height: 60vh; 
         }
 
         #swim-poster {
-            width: 100%;
+            width: 100%; /* 图片宽度自适应容器 */
             height: auto;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto;
         }
 
-        /* 基础信息内容排版 */
+        /* 基础信息排版 */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; }
         .info-section { background: rgba(0,150,136,0.03); padding: 15px; border-radius: 12px; }
         .tag { display: inline-block; background: #e0f2f1; color: #00796b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; font-weight: bold; }
@@ -166,7 +169,6 @@
         { title: '性格与爱好', type: 'special' }
     ];
 
-    // 初始化鱼群
     fishData.forEach((data) => {
         const fish = document.createElement('div');
         fish.className = 'fish';
@@ -196,7 +198,6 @@
         };
     });
 
-    // 展示普通内容 (基础信息/简历等)
     function showNormalModal(title, content) {
         document.getElementById('overlay').style.display = 'block';
         const m = document.getElementById('main-modal');
@@ -205,7 +206,6 @@
         m.style.display = 'block';
     }
 
-    // ✨ 华丽破碎流：兴趣爱好
     function startHobbyFlow() {
         document.getElementById('overlay').style.display = 'block';
         const big = document.createElement('div');
@@ -218,12 +218,10 @@
 
         big.onclick = (e) => {
             e.stopPropagation();
-            // 碎裂动画
             big.style.transform = 'scale(1.8)'; big.style.opacity = '0';
             for(let i=0; i<12; i++) createTinyBubble(window.innerWidth/2, window.innerHeight/2);
             setTimeout(() => big.remove(), 300);
 
-            // 弹出小泡泡
             const hobbies = Object.keys(hobbyData);
             hobbies.forEach((name, i) => {
                 const sub = document.createElement('div');
@@ -243,30 +241,19 @@
 
                 sub.onclick = (ev) => {
                     ev.stopPropagation();
-                    
-                    // =========================================
-                    // ✨ 核心修改 3：JavaScript 逻辑 ✨
-                    // =========================================
                     document.getElementById('detail-title').innerText = name;
                     document.getElementById('detail-content').innerText = hobbyData[name];
-                    
                     const posterContainer = document.getElementById('poster-container');
                     
-                    // 判断是否点击了“游泳”
                     if (name === '游泳') {
-                        // 显示海报容器，并添加展开动画类
                         posterContainer.style.display = 'block';
-                        // 稍微延迟一点添加类，确保 display:block 生效后再执行过渡动画
-                        setTimeout(() => {
-                            posterContainer.classList.add('unfold');
-                        }, 50);
+                        setTimeout(() => { posterContainer.classList.add('unfold'); }, 50);
                     } else {
-                        // 如果点击其他爱好，隐藏海报容器并移除类
                         posterContainer.classList.remove('unfold');
                         posterContainer.style.display = 'none';
                     }
-                    
                     document.getElementById('detail-card').style.display = 'block';
+                    document.getElementById('detail-card').scrollTop = 0; // 每次打开回到顶部
                 };
             });
         };
@@ -283,10 +270,8 @@
         setTimeout(() => t.remove(), 1500);
     }
 
-    // 关闭爱好详情时，重置海报状态
     function closeDetail() { 
         document.getElementById('detail-card').style.display = 'none'; 
-        // 关键：关闭时移除展开类，让 max-height 回到 0
         document.getElementById('poster-container').classList.remove('unfold');
     }
     
@@ -294,10 +279,9 @@
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('main-modal').style.display = 'none';
         document.getElementById('detail-card').style.display = 'none';
-        // 关键：关闭所有时也要重置海报
         document.getElementById('poster-container').classList.remove('unfold');
         document.querySelectorAll('.bubble-common').forEach(b => b.remove());
     }
 </script>
 </body>
-</html>才
+</html>
