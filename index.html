@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>家渝有一片海</title>
+    <title>家渝的个人鱼塘</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
         body { 
@@ -12,7 +12,7 @@
             background-attachment: fixed; background-color: #e0f7fa; 
         }
         
-        /* 1. 中心头像 */
+        /* 中心头像 */
         #profile-avatar {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 220px; height: 220px; border-radius: 50%; border: 8px solid rgba(255, 255, 255, 0.4);
@@ -21,14 +21,14 @@
         }
         @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-15px); } }
 
-        /* 2. 鱼群容器 */
+        /* 鱼群 */
         .fish { position: absolute; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; }
         .fish img { width: 80px; height: auto; transition: transform 0.1s; }
         .fish div { font-size: 14px; color: #00796b; font-weight: bold; text-align: center; margin-top: 5px; }
 
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); z-index: 90; }
 
-        /* 3. 工作经历画廊样式 (重点优化) */
+        /* 工作经历画廊 */
         .work-gallery {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
             gap: 20px; padding: 15px 5px; -webkit-overflow-scrolling: touch;
@@ -41,10 +41,12 @@
             background: #fff; border-radius: 15px; overflow: hidden;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 1px solid #eee;
         }
-        .work-card img { width: 100%; height: auto; display: block; cursor: zoom-in; }
-        .work-card .desc { padding: 12px; font-size: 13px; color: #00796b; text-align: center; background: #fdfdfd; font-weight: 500; }
+        .work-card img { width: 100%; height: auto; display: block; cursor: pointer; }
+        .work-card .desc { padding: 12px; font-size: 13px; color: #444; text-align: center; background: #fdfdfd; }
+        .work-card a { color: #00796b; text-decoration: none; font-weight: bold; display: block; margin-top: 5px; word-break: break-all; font-size: 11px; }
+        .work-card a:hover { text-decoration: underline; }
 
-        /* 4. 弹窗样式 */
+        /* 弹窗通用样式 */
         #detail-card, #main-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 88%; max-width: 520px; max-height: 85vh; padding: 25px; border-radius: 25px;
@@ -53,17 +55,16 @@
         }
         .close-x { position: sticky; top: -10px; float: right; cursor: pointer; font-size: 26px; color: #999; z-index: 160; background: #fff; width: 32px; height: 32px; text-align: center; line-height: 32px; border-radius: 50%; }
 
-        /* 5. 旅游贝壳样式 */
+        /* 贝壳 */
         .shell-item { position: fixed; width: 75px; height: 75px; display: none; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 100; }
         .shell-item img { width: 100%; height: auto; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); transition: transform 0.3s; }
         .shell-item span { font-size: 11px; color: #004d40; font-weight: bold; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px; margin-top: -5px; }
 
-        /* 内容通用排版 */
+        /* 内容排版 */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .info-section { background: rgba(0,150,136,0.04); padding: 15px; border-radius: 12px; border: 1px solid rgba(0,150,136,0.1); }
         .tag { display: inline-block; background: #e0f2f1; color: #00796b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin: 0 4px 4px 0; font-weight: bold; }
         
-        /* 游泳海报容器 */
         #poster-container { width: 100%; height: 0; overflow: visible; transition: height 0.8s ease-in-out; }
         #poster-container.unfold { height: auto; }
         #swim-poster { width: 100%; height: auto; border-radius: 12px; display: block; margin-top: 15px; }
@@ -89,12 +90,11 @@
 </div>
 
 <script>
-    // 1. 数据定义
     const travelCities = ['南京', '北京', '沈阳', '云南', '重庆', '湖南', '广东', '广西', '马来西亚'];
     const hobbyData = {
-        '网球': '热爱挥洒汗水的快感，网球不仅是运动，更是对节奏和爆发力的掌控。',
-        '游泳': '在水底世界寻找宁静，享受每一次划水带来的自由感。',
-        '追星': '记录美好瞬间，学习优秀偶像的闪光点。',
+        '网球': '热爱挥洒汗水的快感。',
+        '游泳': '在水底世界寻找宁静。',
+        '追星': '记录美好瞬间，学习闪光点。',
         '旅游': '记录每一站的风景。点击贝壳探索我的足迹！'
     };
 
@@ -105,19 +105,16 @@
                 <h2 style="color:#00796b; margin-top:0;">基础信息</h2>
                 <div class="info-grid">
                     <div class="info-section">
-                        <h4 style="margin:0 0 8px 0;">👤 个人概况</h4>
                         <b>姓名：</b>罗家渝<br>
                         <b>专业：</b>华南农大 · 农林经管<br>
                         <b>身份：</b>中共预备党员
                     </div>
                     <div class="info-section">
-                        <h4 style="margin:0 0 8px 0;">📍 联系方式</h4>
                         <b>籍贯：</b>广东东莞<br>
                         <b>电话：</b>18998055663<br>
                         <b>邮箱：</b>2304362354@qq.com
                     </div>
                     <div class="info-section" style="grid-column: span 2;">
-                        <h4 style="margin:0 0 8px 0;">🏆 荣誉奖励</h4>
                         🏅 连续两年获得校级奖学金<br>
                         <span class="tag">CET-4</span> <span class="tag">CET-6</span>
                     </div>
@@ -129,33 +126,61 @@
             details: `
                 <h2 style="color:#00796b; margin-top:0;">工作经历</h2>
                 <div class="work-gallery">
-                    <div class="work-card"><img src="dist/assets/img/worke1.jpg" onclick="window.open(this.src)"><div class="desc">TikTok 食谱账号运营</div></div>
-                    <div class="work-card"><img src="dist/assets/img/worke2.jpg" onclick="window.open(this.src)"><div class="desc">Tada App 推广策划</div></div>
-                    <div class="work-card"><img src="dist/assets/img/worke3.jpg" onclick="window.open(this.src)"><div class="desc">KOL/KOC 商务合作</div></div>
-                    <div class="work-card"><img src="dist/assets/img/worke4.jpg" onclick="window.open(this.src)"><div class="desc">短视频内容脚本创作</div></div>
-                    <div class="work-card"><img src="dist/assets/img/worke5.jpg" onclick="window.open(this.src)"><div class="desc">数据分析与复盘</div></div>
+                    <div class="work-card">
+                        <img src="dist/assets/img/worke1.jpg" onclick="window.open('https://www.tiktok.com/@_babyfood')">
+                        <div class="desc">
+                            TikTok 食谱账号运营<br>
+                            <a href="https://www.tiktok.com/@_babyfood" target="_blank">@_babyfood</a>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <img src="dist/assets/img/worke2.jpg" onclick="window.open('https://xhslink.com/m/6RJ7BJGKedW')">
+                        <div class="desc">
+                            美的华凌空调小红书运营<br>
+                            <a href="https://xhslink.com/m/6RJ7BJGKedW" target="_blank">点击查看账号</a>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <img src="dist/assets/img/worke3.jpg" onclick="window.open('https://xhslink.com/m/5dalT0qlOf5')">
+                        <div class="desc">
+                            小红书明星账号 (自媒体)<br>
+                            <a href="https://xhslink.com/m/5dalT0qlOf5" target="_blank">点击查看作品</a>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <img src="dist/assets/img/worke4.jpg" onclick="window.open('https://v.douyin.com/LJAOEbunOag/')">
+                        <div class="desc">
+                            抖音日常分享类账号 (自媒体)<br>
+                            <a href="https://v.douyin.com/LJAOEbunOag/" target="_blank">点击查看主页</a>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <img src="dist/assets/img/worke5.jpg" onclick="window.open('mailto:7@7.com')">
+                        <div class="desc">
+                            KOL运营 - 欧美地区<br>
+                            <span style="font-size:11px; color:#00796b; font-weight:bold;">7@7.com : 7pm</span>
+                        </div>
+                    </div>
                 </div>
-                <p style="font-size:12px; color:#999; text-align:center;">💡 左右滑动切片，点击图片可放大查看</p>
+                <p style="font-size:11px; color:#999; text-align:center; margin-top:10px;">💡 点击图片或链接可直接跳转详情</p>
             `
         },
         { 
             title: '工作技能', 
             details: `
                 <h2 style="color:#00796b; margin-top:0;">专业技能</h2>
-                <div class="info-section" style="margin-bottom:15px;">
-                    <b style="color:#00796b;">🎨 视觉与策划：</b><br>
-                    精通 Figma, Photoshop, Canva, 秀米。具备短视频全流程策划与剪映后期制作能力。
+                <div class="info-section" style="margin-bottom:10px;">
+                    <b style="color:#00796b;">🎨 视觉与策划：</b> Figma, PS, Canva, 秀米排版，短视频全流程策划。
                 </div>
                 <div class="info-section">
-                    <b style="color:#00796b;">📊 数据与办公：</b><br>
-                    精通 Excel 数据透视表分析。持有全国计算机二级证书。
+                    <b style="color:#00796b;">📊 数据办公：</b> 精通 Excel 数据透视表。计算机二级证书。
                 </div>
             `
         },
         { title: '性格与爱好', type: 'special' }
     ];
 
-    // 2. 鱼群逻辑
+    // 鱼群逻辑
     fishData.forEach((data) => {
         const fish = document.createElement('div');
         fish.className = 'fish';
@@ -163,7 +188,6 @@
         document.body.appendChild(fish);
         let posX = Math.random() * (window.innerWidth - 100), posY = Math.random() * (window.innerHeight - 100);
         let velX = (Math.random() - 0.5) * 2, velY = (Math.random() - 0.5) * 2;
-
         function move() {
             posX += velX; posY += velY;
             if (posX < 0 || posX > window.innerWidth - 80) velX *= -1;
@@ -176,7 +200,6 @@
         fish.onclick = () => data.type === 'special' ? startHobbyFlow() : showNormalModal(data.details);
     });
 
-    // 3. 弹窗与交互
     function showNormalModal(content) {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('main-content').innerHTML = content;
@@ -184,7 +207,6 @@
     }
 
     let rotationAngle = 0, isRotating = false;
-
     function startHobbyFlow() {
         document.getElementById('overlay').style.display = 'block';
         const big = document.createElement('div');
@@ -193,7 +215,6 @@
         big.style.left = 'calc(50% - 80px)'; big.style.top = 'calc(50% - 80px)';
         big.innerText = '性格与爱好'; big.style.display = 'flex';
         document.body.appendChild(big);
-
         big.onclick = (e) => {
             e.stopPropagation();
             big.style.transform = 'scale(1.8)'; big.style.opacity = '0';
@@ -214,10 +235,7 @@
                 sub.style.left = (window.innerWidth/2 - 42 + Math.cos(angle) * dist) + 'px';
                 sub.style.top = (window.innerHeight/2 - 42 + Math.sin(angle) * dist) + 'px';
             }, 50);
-            sub.onclick = (ev) => {
-                ev.stopPropagation();
-                name === '旅游' ? startTravelShells() : showHobbyDetail(name);
-            };
+            sub.onclick = (ev) => { ev.stopPropagation(); name === '旅游' ? startTravelShells() : showHobbyDetail(name); };
         });
     }
 
@@ -253,19 +271,14 @@
         const card = document.getElementById('detail-card'), poster = document.getElementById('swim-poster'), container = document.getElementById('poster-container');
         document.getElementById('detail-title').innerText = name;
         document.getElementById('detail-content').innerText = hobbyData[name];
-        if (name === '游泳') {
-            poster.src = "dist/assets/img/游泳.png";
-            container.style.display = 'block';
-            setTimeout(() => container.classList.add('unfold'), 50);
-        } else {
-            container.style.display = 'none';
-        }
+        if (name === '游泳') { poster.src = "dist/assets/img/游泳.png"; container.style.display = 'block'; setTimeout(() => container.classList.add('unfold'), 50); } 
+        else { container.style.display = 'none'; }
         card.style.display = 'block';
     }
 
     function showCityPhoto(city) {
         document.getElementById('detail-title').innerText = `旅游足迹 · ${city}`;
-        document.getElementById('detail-content').innerText = `这是我在${city}留下的美好瞬间...`;
+        document.getElementById('detail-content').innerText = `这是我在${city}留下的回忆...`;
         document.getElementById('poster-container').style.display = 'none';
         document.getElementById('detail-card').style.display = 'block';
     }
